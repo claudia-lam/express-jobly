@@ -30,4 +30,26 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+function sqlForWhereQuery(params, jsToSql) {
+  const keys = Object.keys(params);
+  let operator;
+  // {nameLike: 'Twitter', maxEmployees: 20, minEmployees: 10} => ['"name"'=$1, "numEmployees < 20, numEmployees > 10"]
+  const cols = keys.map((colName, idx) => {
+    if (colName === "minEmployees") {
+      operator = ">";
+    } else if (colName === "maxEmployees") {
+      operator = "<"
+    } else {
+      operator = "ILIKE"
+      params.nameLike = `%${params.nameLike}%`
+    }
+    return `"${jsToSql[colName] || colName } ${operator} $${idx + 1}`
+})
+
+  return {
+    whereCols: cols.join(", "),
+    values: Object.values(params)
+  }
+}
+
+module.exports = { sqlForPartialUpdate, sqlForWhereQuery };
