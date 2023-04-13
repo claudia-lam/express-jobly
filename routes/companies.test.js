@@ -145,7 +145,33 @@ describe("GET /companies", function () {
       companies: [],
     });
   });
+  // TODO: Generalize test descriptions "find companies using all filters w/
+  // valid inputs" + check uniformity w/ other descs in test file
+  test("find all companies with >1 employee, <3 employees and containing c",
+    async function () {
+      const resp = await request(app).get("/companies").query(
+        {
+          nameLike: "c",
+          minEmployees: 1,
+          maxEmployees: 3
+        }
+      );
 
+      expect(resp.statusCode).toEqual(200);
+      expect(resp.body).toEqual({
+        companies: [
+          {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+      ]
+      });
+    });
+    // TODO: Write additional tests for max<min + other errors
+    // TODO: Write test where input doesn't match schema
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This
@@ -156,6 +182,7 @@ describe("GET /companies", function () {
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(500);
   });
+
 });
 
 /************************************** GET /companies/:handle */
