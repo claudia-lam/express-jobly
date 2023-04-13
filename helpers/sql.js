@@ -20,8 +20,8 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   if (keys.length === 0) throw new BadRequestError("No data");
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
-  const cols = keys.map((colName, idx) =>
-    `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+  const cols = keys.map(
+    (colName, idx) => `"${jsToSql[colName] || colName}"=$${idx + 1}`
   );
 
   return {
@@ -32,24 +32,34 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
 function sqlForWhereQuery(params, jsToSql) {
   const keys = Object.keys(params);
+  const { minEmployees, maxEmployees } = params;
+
+  if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
+    throw new BadRequestError("Max employees greater than min employees!");
+  }
+
   let operator;
   // {nameLike: 'Twitter', maxEmployees: 20, minEmployees: 10} => ['"name"'=$1, "numEmployees < 20, numEmployees > 10"]
   const cols = keys.map((colName, idx) => {
     if (colName === "minEmployees") {
       operator = ">";
     } else if (colName === "maxEmployees") {
-      operator = "<"
+      operator = "<";
     } else {
-      operator = "ILIKE"
-      params.nameLike = `%${params.nameLike}%`
+      operator = "ILIKE";
+      params.nameLike = `%${params.nameLike}%`;
     }
-    return `"${jsToSql[colName] || colName } ${operator} $${idx + 1}`
-})
-
+    return `"${jsToSql[colName] || colName}" ${operator} $${idx + 1}`;
+  });
+  // console.log("SQL STATEMENT", cols.join("AND"));
+  console.log("ANSWER to SQLWHERE", {
+    whereCols: cols.join(" AND "),
+    values: Object.values(params),
+  });
   return {
-    whereCols: cols.join(", "),
-    values: Object.values(params)
-  }
+    whereCols: cols.join(" AND "),
+    values: Object.values(params),
+  };
 }
 
 module.exports = { sqlForPartialUpdate, sqlForWhereQuery };

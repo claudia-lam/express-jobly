@@ -96,7 +96,7 @@ describe("GET /companies", function () {
   });
 
   test("find all company names that contains C", async function () {
-    const resp = await request(app).get("/companies?search=c");
+    const resp = await request(app).get("/companies").query({ nameLike: "c" });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -125,7 +125,7 @@ describe("GET /companies", function () {
   });
 
   test("find all company names that contain the number 2", async function () {
-    const resp = await request(app).get("/companies?search=2");
+    const resp = await request(app).get("/companies").query({ nameLike: "2" });
     expect(resp.body).toEqual({
       companies: [
         {
@@ -140,7 +140,7 @@ describe("GET /companies", function () {
   });
 
   test("find all company names that contain b", async function () {
-    const resp = await request(app).get("/companies?search=b");
+    const resp = await request(app).get("/companies").query({ nameLike: "b" });
     expect(resp.body).toEqual({
       companies: [],
     });

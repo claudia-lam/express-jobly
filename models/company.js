@@ -21,7 +21,8 @@ class Company {
       `SELECT handle
            FROM companies
            WHERE handle = $1`,
-      [handle]);
+      [handle]
+    );
 
     if (duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate company: ${handle}`);
@@ -36,13 +37,7 @@ class Company {
            VALUES
              ($1, $2, $3, $4, $5)
            RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`,
-      [
-        handle,
-        name,
-        description,
-        numEmployees,
-        logoUrl,
-      ],
+      [handle, name, description, numEmployees, logoUrl]
     );
     const company = result.rows[0];
 
@@ -62,7 +57,8 @@ class Company {
                 num_employees AS "numEmployees",
                 logo_url AS "logoUrl"
            FROM companies
-           ORDER BY name`);
+           ORDER BY name`
+    );
     return companiesRes.rows;
   }
 
@@ -82,13 +78,13 @@ class Company {
   //
 
   static async filterCompanies(params) {
-    const { whereCols, values } = sqlForWhereQuery(
-      params,
-      {
-        nameLike: "name",
-        maxEmployees: "num_employees",
-        minEmployees: "num_employees",
-      });
+    const { whereCols, values } = sqlForWhereQuery(params, {
+      nameLike: "name",
+      maxEmployees: "num_employees",
+      minEmployees: "num_employees",
+    });
+
+    console.log("WHERECOLS", whereCols);
 
     const companiesRes = await db.query(
       `SELECT handle,
@@ -99,7 +95,8 @@ class Company {
             FROM companies
             WHERE ${whereCols}
             ORDER BY name`,
-      values);
+      values
+    );
 
     return companiesRes.rows;
   }
@@ -121,7 +118,8 @@ class Company {
                 logo_url AS "logoUrl"
            FROM companies
            WHERE handle = $1`,
-      [handle]);
+      [handle]
+    );
 
     const company = companyRes.rows[0];
 
@@ -143,12 +141,10 @@ class Company {
    */
 
   static async update(handle, data) {
-    const { setCols, values } = sqlForPartialUpdate(
-      data,
-      {
-        numEmployees: "num_employees",
-        logoUrl: "logo_url",
-      });
+    const { setCols, values } = sqlForPartialUpdate(data, {
+      numEmployees: "num_employees",
+      logoUrl: "logo_url",
+    });
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `
@@ -175,12 +171,12 @@ class Company {
            FROM companies
            WHERE handle = $1
            RETURNING handle`,
-      [handle]);
+      [handle]
+    );
     const company = result.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
 }
-
 
 module.exports = Company;
