@@ -75,8 +75,8 @@ class Company {
   // [minEmployees, 10],
   // [maxEmployees, 20]];
 
-  //
-
+  // TODO: flesh out docstring further w/ input/return examples
+  // TODO: WOU
   static async filterCompanies(params) {
     const { whereCols, values } = sqlForWhereQuery(params, {
       nameLike: "name",
@@ -84,7 +84,7 @@ class Company {
       minEmployees: "num_employees",
     });
 
-    console.log("WHERECOLS", whereCols);
+    console.log("WHERECOLS", whereCols); //TODO: delete this line
 
     const companiesRes = await db.query(
       `SELECT handle,
@@ -100,6 +100,8 @@ class Company {
 
     return companiesRes.rows;
   }
+
+  // static _helperMethod() {}
 
   /** Given a company handle, return data about company.
    *
