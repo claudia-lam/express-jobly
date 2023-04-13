@@ -123,6 +123,9 @@ describe("filter companies", function () {
     ]);
   });
 
+  /** IS THIS A VALID UNITTEST SINCE IT RELIES ON ERROR CAUGHT IN HELPER FUNC?
+   *
+   */
   test("fail", async function () {
     let companies = await Company.filterCompanies({
       nameLike: "Twitter",
