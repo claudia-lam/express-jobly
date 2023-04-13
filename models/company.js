@@ -64,27 +64,24 @@ class Company {
 
   /** Search for specific companies
    *
-   * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   * Takes in 1-3 queries:
+   * {
+   *  nameLike: companyName,
+   *  maxEmployees: integer,
+   *  minEmployees: integer
+   * }
+   *
+   * Returns:
+   * [{ handle, name, description, numEmployees, logoUrl }, ...]
    *
    */
 
-  // Iterate over the array and put query in WHERE statement, and value in
-  // values array
-
-  // [[nameLike, "justin"],
-  // [minEmployees, 10],
-  // [maxEmployees, 20]];
-
-  // TODO: flesh out docstring further w/ input/return examples
-  // TODO: WOU
-  static async filterCompanies(params) {
-    const { whereCols, values } = sqlForWhereQuery(params, {
+  static async filterCompanies(queries) {
+    const { whereCols, values } = sqlForWhereQuery(queries, {
       nameLike: "name",
       maxEmployees: "num_employees",
       minEmployees: "num_employees",
     });
-
-    console.log("WHERECOLS", whereCols); //TODO: delete this line
 
     const companiesRes = await db.query(
       `SELECT handle,

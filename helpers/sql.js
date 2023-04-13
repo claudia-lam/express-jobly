@@ -46,15 +46,15 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
  *   values: [array of values for SET statement]
  * }
  */
- // TODO: remove JSON body mention, provide clear example of input/return
+// TODO: remove JSON body mention, provide clear example of input/return
 function sqlForWhereQuery(params, jsToSql) {
   const keys = Object.keys(params);
   const { minEmployees, maxEmployees } = params;
 
   if (
-    ("minEmployees" in params &&
-    "maxEmployees" in params) &&
-    parseInt(minEmployees) > parseInt(maxEmployees) // TODO: Update this, don't need it can do in validation
+    "minEmployees" in params &&
+    "maxEmployees" in params &&
+    minEmployees > maxEmployees
   ) {
     throw new BadRequestError("Max employees greater than min employees!");
   }

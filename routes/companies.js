@@ -12,6 +12,7 @@ const Company = require("../models/company");
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
 const filterCompaniesSchema = require("../schemas/filterCompanies.json");
+const { json } = require("body-parser");
 
 const router = new express.Router();
 
@@ -47,28 +48,33 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  *
  * Authorization required: none
  */
-// TODO: Update to check if field exists and convert to int b4 validation
 router.get("/", async function (req, res, next) {
   let companies;
+
   if (Object.keys(req.query).length === 0) {
-
     companies = await Company.findAll();
-    // TODO: Guard block instead of if/else block / quick return
-    // Can't mutate req.query
-  } else {
-
-    const validator = jsonschema.validate(req.query, filterCompaniesSchema, {
-      required: true,
-    });
-
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
-
-    companies = await Company.filterCompanies(req.query);
+    return res.json({ companies });
   }
 
+  const queries = JSON.parse(JSON.stringify(req.query));
+  if ("minEmployees" in queries) {
+    queries.minEmployees = parseInt(queries.minEmployees);
+  }
+
+  if ("maxEmployees" in queries) {
+    queries.maxEmployees = parseInt(queries.maxEmployees);
+  }
+
+  const validator = jsonschema.validate(queries, filterCompaniesSchema, {
+    required: true,
+  });
+
+  if (!validator.valid) {
+    const errs = validator.errors.map((e) => e.stack);
+    throw new BadRequestError(errs);
+  }
+
+  companies = await Company.filterCompanies(req.query);
   return res.json({ companies });
 });
 
