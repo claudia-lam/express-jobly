@@ -3,6 +3,8 @@
 const { BadRequestError } = require("../expressError");
 const { sqlForPartialUpdate, sqlForWhereQuery } = require("./sql");
 
+/** sqlForPartialUpdate tests */
+// TODO: remove 'JSON body' from test descriptions, CONSIDER global var
 describe("sqlForPartialUpdate", function () {
   test("works: complete JSON body for companies", function () {
     const output = sqlForPartialUpdate(
@@ -111,6 +113,8 @@ describe("sqlForPartialUpdate", function () {
   });
 });
 
+/** sqlForWhereQuery tests */
+//TODO: remove JSON body mentions
 describe("sqlForWhereQuery", function () {
   test("works: complete JSON body for companies", function () {
     const output = sqlForWhereQuery(
@@ -162,11 +166,12 @@ describe("sqlForWhereQuery", function () {
           minEmployees: "num_employees",
         }
       );
+      //TODO: Add backup error here to prevent false positive
     } catch (err) {
       expect(err).toBeInstanceOf(BadRequestError);
     }
   });
-
+  // TODO: add backup error to prevent false positive
   test("fails: min > max", function () {
     try {
       const output = sqlForWhereQuery(
@@ -185,6 +190,7 @@ describe("sqlForWhereQuery", function () {
     }
   });
 
+  /** IS THIS EDGE CASE NECESSARY?  */
   test("works: defaults to colName if doesn't fit jsToSql", function () {
     const output = sqlForWhereQuery(
       {
@@ -199,7 +205,7 @@ describe("sqlForWhereQuery", function () {
     );
 
     expect(output).toEqual({
-      whereCols: '"different"=$1, "different2"=$2',
+      whereCols: '"different" = $1 AND "different2" = $2',
       values: [100, "http://test.com"],
     });
   });
