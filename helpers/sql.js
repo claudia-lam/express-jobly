@@ -30,11 +30,32 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
+/**
+ * Helper function to format JSON body from search querires for SET sql
+ * statement
+ *
+ * Takes:
+ *  - params: JS object containing 1 - 3 optional queries
+ *    {name: query value,...}
+ *  - jsToSql: JS object containing column names for DB model
+ *    {jsColName: psqlColName, ...}
+ *
+ * Returns:
+ * {
+ *   whereCols: (string of column names for SET statement),
+ *   values: [array of values for SET statement]
+ * }
+ */
+
 function sqlForWhereQuery(params, jsToSql) {
   const keys = Object.keys(params);
   const { minEmployees, maxEmployees } = params;
 
-  if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
+  if (
+    minEmployees in params &&
+    maxEmployees in params &&
+    minEmployees > maxEmployees
+  ) {
     throw new BadRequestError("Max employees greater than min employees!");
   }
 
