@@ -3,9 +3,9 @@ const { BadRequestError } = require("../expressError");
 /**
  * Helper function to format JSON body from .update routes for SET sql
  * statement
- *
+ * TODO: Add example input/return, update language to make clear this is a more general function
  * Takes:
- *  - dataToUpdate: JS object containing data meant to DB
+ *  - dataToUpdate: JS object containing data meant for DB
  *  - jsToSql: JS object containing column names for DB model
  *
  * Returns:
@@ -46,27 +46,27 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
  *   values: [array of values for SET statement]
  * }
  */
-
+ // TODO: remove JSON body mention, provide clear example of input/return
 function sqlForWhereQuery(params, jsToSql) {
   const keys = Object.keys(params);
   const { minEmployees, maxEmployees } = params;
 
   if (
-    minEmployees in params &&
-    maxEmployees in params &&
-    minEmployees > maxEmployees
+    ("minEmployees" in params &&
+    "maxEmployees" in params) &&
+    parseInt(minEmployees) > parseInt(maxEmployees) // TODO: Update this, don't need it can do in validation
   ) {
     throw new BadRequestError("Max employees greater than min employees!");
   }
 
-  let operator;
+  let operator = "=";
   // {nameLike: 'Twitter', maxEmployees: 20, minEmployees: 10} => ['"name"'=$1, "numEmployees < 20, numEmployees > 10"]
   const cols = keys.map((colName, idx) => {
     if (colName === "minEmployees") {
       operator = ">";
     } else if (colName === "maxEmployees") {
       operator = "<";
-    } else {
+    } else if (colName === "nameLike") {
       operator = "ILIKE";
       params.nameLike = `%${params.nameLike}%`;
     }
@@ -82,5 +82,7 @@ function sqlForWhereQuery(params, jsToSql) {
     values: Object.values(params),
   };
 }
+
+//TODO: Move this into models as _helper method
 
 module.exports = { sqlForPartialUpdate, sqlForWhereQuery };
