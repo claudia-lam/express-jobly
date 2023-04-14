@@ -24,10 +24,17 @@ async function commonBeforeAll() {
         VALUES ('u1', $1, 'U1F', 'U1L', 'u1@email.com'),
                ('u2', $2, 'U2F', 'U2L', 'u2@email.com')
         RETURNING username`,
-      [
-        await bcrypt.hash("password1", BCRYPT_WORK_FACTOR),
-        await bcrypt.hash("password2", BCRYPT_WORK_FACTOR),
-      ]);
+    [
+      await bcrypt.hash("password1", BCRYPT_WORK_FACTOR),
+      await bcrypt.hash("password2", BCRYPT_WORK_FACTOR),
+    ]);
+
+  await db.query(`
+  INSERT INTO jobs(title, salary, equity, company_handle)
+  VALUES ('j1', '100000', 0, 'c1'),
+         ('j2', '90000', 0.01, 'c2'),
+         ('j3', '50000', 0.03, 'c3')
+  `);
 }
 
 async function commonBeforeEach() {
