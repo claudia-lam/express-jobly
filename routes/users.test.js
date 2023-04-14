@@ -165,14 +165,14 @@ describe("GET /users", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("fails: unauth for non-admin", async function () {
+  test("fails unauth for non-admin", async function () {
     const resp = await request(app)
       .get("/users")
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("fails: test next() handler", async function () {
+  test("fails test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This
     // should cause an error, all right :)
@@ -185,6 +185,7 @@ describe("GET /users", function () {
 });
 
 /************************************** GET /users/:username */
+//TODO: not current user tries to access a non-existent user
 
 describe("GET /users/:username", function () {
   test("works for admins", async function () {
@@ -214,11 +215,27 @@ describe("GET /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("fails: unauth for non-admin", async function () {
+  test("fails unauth for non-admin", async function () {
+    const resp = await request(app)
+      .get(`/users/u2`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("works if user requests own information", async function () {
     const resp = await request(app)
       .get(`/users/u1`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+    });
   });
 });
 
@@ -270,7 +287,7 @@ describe("PATCH /users/:username", () => {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("works: set new password", async function () {
+  test("works if admin sets new password", async function () {
     const resp = await request(app)
       .patch(`/users/u1`)
       .send({
@@ -290,19 +307,28 @@ describe("PATCH /users/:username", () => {
     expect(isSuccessful).toBeTruthy();
   });
 
-  test("fails: unauth for non-admin", async function () {
+  test("works if current user sets new password for themselves", async function () {
     const resp = await request(app)
       .patch(`/users/u1`)
       .send({
-        firstName: "New",
+        password: "new-password",
       })
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+    });
+    const isSuccessful = await User.authenticate("u1", "new-password");
+    expect(isSuccessful).toBeTruthy();
   });
 });
 
 /************************************** DELETE /users/:username */
-// TODO: Admin only
 describe("DELETE /users/:username", function () {
   test("works for admins", async function () {
     const resp = await request(app)
@@ -323,9 +349,17 @@ describe("DELETE /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("fails: unauth for non-admins", async function () {
+  test("works if current user deletes own account", async function () {
     const resp = await request(app)
       .delete(`/users/u1`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({ deleted: "u1" });
+  });
+
+  test("unauth if non admin deletes another account", async function () {
+    const resp = await request(app)
+      .delete(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });

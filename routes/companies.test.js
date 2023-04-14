@@ -11,7 +11,7 @@ const {
   commonAfterEach,
   commonAfterAll,
   u1Token,
-  a1Token
+  a1Token,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -20,6 +20,7 @@ afterEach(commonAfterEach);
 afterAll(commonAfterAll);
 
 /************************************** POST /companies */
+//TODO: non authorized user post with bad data, which one causes the failure?
 
 describe("POST /companies", function () {
   const newCompany = {
@@ -70,7 +71,6 @@ describe("POST /companies", function () {
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
-
 });
 
 /************************************** GET /companies */
@@ -156,60 +156,50 @@ describe("GET /companies", function () {
     });
   });
 
-  test("valid queries: works with nameLike, max and min employees filters",
-    async function () {
-      const resp = await request(app).get("/companies").query(
-        {
-          nameLike: "c",
-          minEmployees: 1,
-          maxEmployees: 3
-        }
-      );
-
-      expect(resp.statusCode).toEqual(200);
-      expect(resp.body).toEqual({
-        companies: [
-          {
-            handle: "c2",
-            name: "C2",
-            description: "Desc2",
-            numEmployees: 2,
-            logoUrl: "http://c2.img",
-          },
-        ]
-      });
+  test("valid queries: works with nameLike, max and min employees filters", async function () {
+    const resp = await request(app).get("/companies").query({
+      nameLike: "c",
+      minEmployees: 1,
+      maxEmployees: 3,
     });
 
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+      ],
+    });
+  });
+
   test("fails: queries don't match schema", async function () {
-    const resp = await request(app).get("/companies").query(
-      {
-        wrong: "wrong",
-        bad: "bad",
-        incorrect: "incorrect",
-      }
-    );
+    const resp = await request(app).get("/companies").query({
+      wrong: "wrong",
+      bad: "bad",
+      incorrect: "incorrect",
+    });
 
     expect(resp.statusCode).toEqual(400);
-
   });
 
   test("fails: min higher than max", async function () {
-    const resp = await request(app).get("/companies").query(
-      {
-        minEmployees: 10,
-        maxEmployees: 1
-      }
-    );
+    const resp = await request(app).get("/companies").query({
+      minEmployees: 10,
+      maxEmployees: 1,
+    });
 
     expect(resp.statusCode).toEqual(400);
-    expect(resp.body).toEqual(
-      {
-        "error": {
-          "message": "Max employees greater than min employees!",
-          "status": 400
-        }
-      }
-    );
+    expect(resp.body).toEqual({
+      error: {
+        message: "Max employees greater than min employees!",
+        status: 400,
+      },
+    });
   });
 
   test("fails: test next() handler", async function () {
@@ -222,7 +212,6 @@ describe("GET /companies", function () {
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(500);
   });
-
 });
 
 /************************************** GET /companies/:handle */
@@ -357,5 +346,4 @@ describe("DELETE /companies/:handle", function () {
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
-
 });

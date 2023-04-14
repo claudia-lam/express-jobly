@@ -47,23 +47,25 @@ function ensureAdmin(req, res, next) {
   throw new UnauthorizedError();
 }
 
-/** Middleware: Requires user is user for route. */
+//TODO: add login to docstring
+/** Middleware: Requires user is user for route or admin. */
 
-function ensureCorrectUser(req, res, next) {
+function ensureAdminOrCorrectUser(req, res, next) {
   const currentUser = res.locals.user;
-  const hasUnauthorizedUsername = currentUser?.username !== req.params.username;
+  const hasAuthorizedUsername = currentUser?.username === req.params.username;
 
-  if (!currentUser || hasUnauthorizedUsername) {
-    ensureAdmin(req, res, next);
-    throw new UnauthorizedError();
+  const isAdmin = currentUser?.isAdmin === true;
+
+  if (isAdmin || hasAuthorizedUsername) {
+    return next();
   }
 
-  return next();
+  throw new UnauthorizedError("Must be admin or current user!");
 }
 
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureCorrectUser,
+  ensureAdminOrCorrectUser,
 };

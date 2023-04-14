@@ -8,7 +8,7 @@ const express = require("express");
 const {
   ensureLoggedIn,
   ensureAdmin,
-  ensureCorrectUser,
+  ensureAdminOrCorrectUser,
 } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
@@ -48,7 +48,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  *
  * Returns list of all users.
  *
- * Authorization required: none
+ * Authorization required: none TODO: update authorization
  **/
 
 router.get("/", ensureAdmin, async function (req, res, next) {
@@ -60,13 +60,17 @@ router.get("/", ensureAdmin, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, isAdmin }
  *
- * Authorization required: admin
+ * Authorization required: admin or current user
  **/
 
-router.get("/:username", ensureCorrectUser, async function (req, res, next) {
-  const user = await User.get(req.params.username);
-  return res.json({ user });
-});
+router.get(
+  "/:username",
+  ensureAdminOrCorrectUser,
+  async function (req, res, next) {
+    const user = await User.get(req.params.username);
+    return res.json({ user });
+  }
+);
 
 /** PATCH /[username] { user } => { user }
  *
@@ -75,30 +79,38 @@ router.get("/:username", ensureCorrectUser, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
- * Authorization required: admin
+ * Authorization required: admin or current user
  **/
 
-router.patch("/:username", ensureCorrectUser, async function (req, res, next) {
-  const validator = jsonschema.validate(req.body, userUpdateSchema, {
-    required: true,
-  });
-  if (!validator.valid) {
-    const errs = validator.errors.map((e) => e.stack);
-    throw new BadRequestError(errs);
-  }
+router.patch(
+  "/:username",
+  ensureAdminOrCorrectUser,
+  async function (req, res, next) {
+    const validator = jsonschema.validate(req.body, userUpdateSchema, {
+      required: true,
+    });
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
 
-  const user = await User.update(req.params.username, req.body);
-  return res.json({ user });
-});
+    const user = await User.update(req.params.username, req.body);
+    return res.json({ user });
+  }
+);
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: admin
+ * Authorization required: admin or current user
  **/
 
-router.delete("/:username", ensureCorrectUser, async function (req, res, next) {
-  await User.remove(req.params.username);
-  return res.json({ deleted: req.params.username });
-});
+router.delete(
+  "/:username",
+  ensureAdminOrCorrectUser,
+  async function (req, res, next) {
+    await User.remove(req.params.username);
+    return res.json({ deleted: req.params.username });
+  }
+);
 
 module.exports = router;
