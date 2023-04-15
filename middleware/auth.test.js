@@ -5,8 +5,8 @@ const { UnauthorizedError } = require("../expressError");
 const {
   authenticateJWT,
   ensureLoggedIn,
+  ensureAdminOrCorrectUser,
 } = require("./auth");
-
 
 const { SECRET_KEY } = require("../config");
 const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
@@ -45,7 +45,6 @@ describe("authenticateJWT", function () {
   });
 });
 
-
 describe("ensureLoggedIn", function () {
   test("works", function () {
     const req = {};
@@ -57,5 +56,25 @@ describe("ensureLoggedIn", function () {
     const req = {};
     const res = { locals: {} };
     expect(() => ensureLoggedIn(req, res, next)).toThrowError();
+  });
+});
+
+describe("ensureAdminOrCorrectUser", function () {
+  test("works for admin", function () {
+    const req = { params: { username: "u1" } };
+    const res = { locals: { user: { isAdmin: true, username: "a1" } } };
+    ensureAdminOrCorrectUser(req, res, next);
+  });
+
+  test("works for same user", function () {
+    const req = { params: { username: "u1" } };
+    const res = { locals: { user: { isAdmin: false, username: "u1" } } };
+    ensureAdminOrCorrectUser(req, res, next);
+  });
+
+  test("unauth for non admin", function () {
+    const req = { params: { username: "u2" } };
+    const res = { locals: { user: { isAdmin: false, username: "u1" } } };
+    expect(() => ensureAdminOrCorrectUser(req, res, next)).toThrowError();
   });
 });
