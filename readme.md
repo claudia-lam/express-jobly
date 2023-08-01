@@ -2,14 +2,14 @@
 Jobly is a full stack web application for job seekers. Users can create an account and log in to access a list of companies and jobs. Users can also search for a specific job or company using the search bar. The backend operates purely as an API, returning JSON data, and the frontend is built with React.
 
 # Table of Contents
-1. [Features](#Features)
-2. [Tech stack](#Tech-stack)
-3. [Database Entity Relationships](#Database-entity-relationships)
-4. [Install](#Install)
-5. [Testing](#Testing)
-6. [Deployment](#Deployment)
-7. [Future features](#Future-features)
-8. [Contributers](#Contributers)
+1. [What I learned](#What-I-learned)
+2. [Features](#Features)
+3. [Tech stack](#Tech-stack)
+4. [Database Entity Relationships](#Database-entity-relationships)
+5. [Install](#Install)
+6. [Testing](#Testing)
+7. [Deployment](#Deployment)
+8. [Future features](#Future-features)
 
 # What I learned
 ##### Frontend
